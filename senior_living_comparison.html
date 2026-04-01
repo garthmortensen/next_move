@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior Living Cost Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ec;
+    --surface: #ffffff;
+    --border: #ddd8cf;
+    --text: #1a1714;
+    --muted: #6b645a;
+    --waters: #2c5f6e;
+    --waters-light: #e8f2f5;
+    --lilydale: #7a4e2d;
+    --lilydale-light: #f5ede5;
+    --willows: #4a3d6b;
+    --willows-light: #edeaf5;
+    --lyng: #2d5c2d;
+    --lyng-light: #e6f2e6;
+    --accent: #c8a96e;
+    --positive: #2d6a4f;
+    --caution: #b45309;
+    --tag-bg: #f0ebe3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem 1rem 4rem; font-size: 14px; line-height: 1.5; }
+  .page { max-width: 1100px; margin: 0 auto; }
+  header { margin-bottom: 2.5rem; border-bottom: 2px solid var(--accent); padding-bottom: 1.2rem; }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--text); font-weight: 400; letter-spacing: -0.02em; }
+  header p { color: var(--muted); margin-top: 0.4rem; font-size: 13px; }
+  .section-label { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; margin: 2.5rem 0 1rem; color: var(--text); display: flex; align-items: center; gap: 0.6rem; }
+  .section-label .pill { font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 20px; background: var(--tag-bg); color: var(--muted); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--bg); border-bottom: 2px solid var(--border); }
+  thead th { padding: 0.7rem 0.9rem; text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+  thead th:not(:first-child) { text-align: right; }
+  tbody tr { border-bottom: 1px solid #eee8df; transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #faf8f4; }
+  tbody tr.group-header td { background: var(--tag-bg); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); padding: 0.5rem 0.9rem; border-bottom: 1px solid var(--border); }
+  td { padding: 0.6rem 0.9rem; vertical-align: top; }
+  td:not(:first-child) { text-align: right; font-family: 'DM Mono', monospace; font-size: 12px; }
+  td:first-child { color: var(--muted); font-size: 12px; min-width: 160px; }
+  .amount { color: var(--text); font-weight: 500; }
+  .range { color: var(--text); }
+  .note { font-size: 10px; color: var(--muted); font-family: 'DM Sans', sans-serif; margin-top: 2px; }
+  .na { color: #bbb; font-style: italic; font-size: 11px; font-family: 'DM Sans', sans-serif; }
+  .included { color: var(--positive); font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600; }
+  .not-included { color: var(--caution); font-family: 'DM Sans', sans-serif; font-size: 11px; }
+  .totals-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+  .totals-header { background: var(--text); color: #fff; padding: 0.8rem 1.2rem; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; }
+  .totals-grid { display: grid; border-bottom: 1px solid var(--border); }
+  .total-col { padding: 1rem 1.2rem; border-right: 1px solid var(--border); }
+  .total-col:last-child { border-right: none; }
+  .total-col.scenario-col { background: var(--bg); font-size: 11px; color: var(--muted); display: flex; align-items: center; }
+  .fac-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .waters-label { color: var(--waters); }
+  .lilydale-label { color: var(--lilydale); }
+  .willows-label { color: var(--willows); }
+  .lyng-label { color: var(--lyng); }
+  .total-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.3rem; }
+  .total-row-label { font-size: 11px; color: var(--muted); }
+  .total-amount { font-family: 'DM Mono', monospace; font-size: 1rem; font-weight: 600; color: var(--text); }
+  .total-note { font-size: 10px; color: var(--muted); margin-top: 4px; }
+  .low-badge { display: inline-block; background: #dcfce7; color: var(--positive); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 1px 6px; border-radius: 4px; margin-left: 4px; }
+  .high-badge { display: inline-block; background: #fee2e2; color: #991b1b; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 1px 6px; border-radius: 4px; margin-left: 4px; }
+  .footnote { font-size: 11px; color: var(--muted); padding: 0.8rem 1.2rem; border-top: 1px solid var(--border); background: var(--bg); }
+  .onetime-row { background: #fffbf3; }
+  .lyng-note { background: var(--lyng-light); border-left: 3px solid var(--lyng); padding: 0.5rem 0.9rem; font-size: 11px; color: #1a3c1a; margin-bottom: 1rem; border-radius: 0 6px 6px 0; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <h1>Senior Living — Cost Comparison</h1>
+  <p>The Waters of Highland Park &nbsp;·&nbsp; Lilydale Senior Living &nbsp;·&nbsp; The Willows at Ramsey Hill &nbsp;·&nbsp; Lyngblomsten at Lino Lakes &nbsp;·&nbsp; 2025–2026 pricing</p>
+</header>
+
+<!-- ===== ASSISTED LIVING ===== -->
+<div class="section-label">
+  Assisted Living
+  <span class="pill">The Waters · Lilydale · Lyngblomsten</span>
+</div>
+<div class="lyng-note">⚑ Lyngblomsten at Lino Lakes is located in Lino Lakes, MN (not St. Paul). It is a Lutheran nonprofit campus with both AL and MC on-site, warm water pool, pub/restaurant, theater, and workshop.</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th style="color:var(--waters)">The Waters of Highland Park</th>
+        <th style="color:var(--lilydale)">Lilydale Senior Living</th>
+        <th style="color:var(--lyng)">Lyngblomsten at Lino Lakes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group-header"><td colspan="4">Monthly Rent</td></tr>
+      <tr>
+        <td>Studio</td>
+        <td><span class="amount">$2,810</span><div class="note">523 sq ft</div></td>
+        <td><span class="range">$4,607–$5,257</span><div class="note">495–682 sq ft</div></td>
+        <td><span class="amount">$4,070</span><div class="note">440 sq ft (Baldwin)</div></td>
+      </tr>
+      <tr>
+        <td>One Bedroom</td>
+        <td><span class="amount">$3,235</span><div class="note">616–922 sq ft</div></td>
+        <td><span class="range">$5,622–$5,848</span><div class="note">716–788 sq ft</div></td>
+        <td><span class="range">$4,470–$4,550</span><div class="note">560 sq ft (Peltier)</div></td>
+      </tr>
+      <tr>
+        <td>One Bedroom + Den</td>
+        <td><span class="amount">$5,315</span><div class="note">836 sq ft</div></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+      <tr>
+        <td>Two Bedroom</td>
+        <td><span class="amount">$6,145</span><div class="note">891–1,029 sq ft</div></td>
+        <td><span class="range">$6,576–$6,970</span><div class="note">1,026–1,152 sq ft</div></td>
+        <td><span class="amount">$4,790</span><div class="note">975 sq ft (Rondeau)</div></td>
+      </tr>
+      <tr>
+        <td>Second Person Fee</td>
+        <td><span class="amount">$500/mo</span></td>
+        <td><span class="amount">$450/mo</span></td>
+        <td><span class="amount">$300/mo</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="4">Healthcare / Care Packages (required — nurse-assessed)</td></tr>
+      <tr>
+        <td>Lowest care tier</td>
+        <td><span class="amount">$1,090/mo</span><div class="note">Level 1</div></td>
+        <td><span class="amount">$790/mo</span><div class="note">Package A: 2 visits/day, up to 15 hrs/mo</div></td>
+        <td><span class="amount">$805/mo</span><div class="note">Healthcare Service Plan — lowest tier</div></td>
+      </tr>
+      <tr>
+        <td>Mid care tier</td>
+        <td><span class="amount">$2,790/mo</span><div class="note">Level 3</div></td>
+        <td><span class="amount">$2,294/mo</span><div class="note">Package C: 6 visits/day, up to 45 hrs/mo</div></td>
+        <td><span class="na">—</span><div class="note">Exact mid-level not published</div></td>
+      </tr>
+      <tr>
+        <td>Highest care tier</td>
+        <td><span class="amount">$5,340/mo</span><div class="note">Level 6</div></td>
+        <td><span class="amount">$3,699/mo</span><div class="note">Package E: 10 visits/day, up to 75 hrs/mo</div></td>
+        <td><span class="amount">$10,045/mo</span><div class="note">⚠ Highest ceiling of all AL options listed</div></td>
+      </tr>
+      <tr>
+        <td>Medication package</td>
+        <td><span class="na">—</span><div class="note">Included in care levels</div></td>
+        <td><span class="range">$917–$1,617/mo</span><div class="note">Optional add-on packages A–B</div></td>
+        <td><span class="included">✓ Included in care plan</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="4">Meals</td></tr>
+      <tr>
+        <td>Continental Breakfast</td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="included">✓ Included in rent</span></td>
+      </tr>
+      <tr>
+        <td>Full Meal Package (3/day)</td>
+        <td><span class="amount">$600/mo</span><div class="note">Café, Restaurant &amp; Private Dining access</div></td>
+        <td><span class="amount">$125/mo</span><div class="note">Chef-prepared, restaurant-style</div></td>
+        <td><span class="amount">$785/mo</span><div class="note">Full restaurant dining (Wally's + Sophia's café on campus)</div></td>
+      </tr>
+      <tr>
+        <td>Partial meal packages</td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="range">$345–$785/mo</span><div class="note">1–3 meals/day options available</div></td>
+      </tr>
+      <tr>
+        <td>Monthly Spend Down / Flex</td>
+        <td><span class="amount">$375/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="4">What's Included in Rent?</td></tr>
+      <tr>
+        <td>Utilities (heat, electric, water…)</td>
+        <td><span class="included">✓ All utilities included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Electricity, heat/A/C, garbage/recycling</span></td>
+      </tr>
+      <tr>
+        <td>Satellite TV / Cable</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Satellite TV included</span></td>
+      </tr>
+      <tr>
+        <td>WiFi</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Included</span></td>
+      </tr>
+      <tr>
+        <td>Weekly housekeeping</td>
+        <td><span class="included">✓ Included in care pkg</span></td>
+        <td><span class="not-included">$38/hr à la carte</span></td>
+        <td><span class="included">✓ Light housekeeping weekly (in basic services)</span></td>
+      </tr>
+      <tr>
+        <td>Laundry / linen</td>
+        <td><span class="included">✓ Included in care pkg</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Weekly laundry &amp; linen changes (in basic services)</span></td>
+      </tr>
+      <tr>
+        <td>Transportation</td>
+        <td><span class="included">✓ Scheduled outings</span></td>
+        <td><span class="not-included">$8.50/trip escort</span></td>
+        <td><span class="included">✓ Scheduled events &amp; shopping</span></td>
+      </tr>
+      <tr>
+        <td>24/7 care staff / RA</td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ RN Director on-site</span></td>
+        <td><span class="included">✓ Resident Assistants on duty 24/7</span></td>
+      </tr>
+      <tr>
+        <td>Emergency call pendant</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="amount">$8.50/check à la carte</span></td>
+        <td><span class="included">✓ Emergency response system (in basic services)</span></td>
+      </tr>
+      <tr>
+        <td>Nursing care coordination</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="included">✓ Ongoing nursing coordination (in basic services)</span></td>
+      </tr>
+      <tr>
+        <td>Campus amenities access</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="na">Standard amenities</span></td>
+        <td><span class="included">✓ Warm water pool, fitness center, theater, pub, golf simulator, workshop, chapel, garden</span></td>
+      </tr>
+      <tr>
+        <td>Programming (wellness, spiritual…)</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Included in rent</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="4">One-Time / Move-In Fees</td></tr>
+      <tr class="onetime-row">
+        <td>Community / Lifestyle Fee</td>
+        <td><span class="amount">$2,500</span><div class="note">Non-refundable</div></td>
+        <td><span class="na">—</span></td>
+        <td><span class="amount">$1,500</span><div class="note">Non-refundable; unlocks all campus amenities</div></td>
+      </tr>
+      <tr class="onetime-row">
+        <td>Reservation / Deposit</td>
+        <td><span class="amount">$1,000</span><div class="note">Applied to 1st month's rent</div></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+      <tr class="onetime-row">
+        <td>Initial Assessment Fee</td>
+        <td><span class="na">—</span></td>
+        <td><span class="amount">$260</span><div class="note">Nursing assessment fee</div></td>
+        <td><span class="na">—</span><div class="note">RN assessment included pre-lease</div></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="4">Optional Monthly Add-Ons</td></tr>
+      <tr>
+        <td>Underground / heated parking</td>
+        <td><span class="amount">$100/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">Available — price not listed</span></td>
+      </tr>
+      <tr>
+        <td>Storage Unit</td>
+        <td><span class="amount">$80/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">Available — price not listed</span></td>
+      </tr>
+      <tr>
+        <td>LTC Insurance Coordination</td>
+        <td><span class="amount">$60/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+      <tr>
+        <td>On-site physician / NP access</td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="not-included">Separate purchase</span><div class="note">On-site physician group or NP available</div></td>
+      </tr>
+      <tr>
+        <td>Dental / podiatry care</td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="not-included">Separate purchase</span></td>
+      </tr>
+      <tr>
+        <td>Hair salon / massage</td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="na">Not listed</span></td>
+        <td><span class="not-included">Blue Heron Salon on campus</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- AL Totals -->
+<div class="totals-card">
+  <div class="totals-header">Estimated Monthly Total — Assisted Living · Studio, Minimum Care, 3 Meals/Day</div>
+  <div class="totals-grid" style="grid-template-columns: 1.5fr 1fr 1fr 1fr;">
+    <div class="total-col scenario-col">Studio + minimum assessed care tier + 3 meals/day. Waters meals included in care packages already.</div>
+    <div class="total-col">
+      <div class="fac-label waters-label">The Waters</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$2,810</span></div>
+      <div class="total-row"><span class="total-row-label">Care (Level 1)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$1,090</span></div>
+      <div class="total-row"><span class="total-row-label">3 Meals/Day</span><span style="font-family:'DM Mono',monospace;font-size:12px">$600</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$4,500 <span class="low-badge">lower</span></span></div>
+      <div class="total-note">+ $2,500 one-time community fee. Utilities/cable/W-D included in rent.</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lilydale-label">Lilydale</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio, low)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$4,607</span></div>
+      <div class="total-row"><span class="total-row-label">Care (Package A)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$790</span></div>
+      <div class="total-row"><span class="total-row-label">3 Meals/Day</span><span style="font-family:'DM Mono',monospace;font-size:12px">$125</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$5,522</span></div>
+      <div class="total-note">+ $260 one-time assessment fee.</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lyng-label">Lyngblomsten</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$4,070</span></div>
+      <div class="total-row"><span class="total-row-label">Care (min plan)</span><span style="font-family:'DM Mono',monospace;font-size:12px">$805</span></div>
+      <div class="total-row"><span class="total-row-label">3 Meals/Day</span><span style="font-family:'DM Mono',monospace;font-size:12px">$785</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$5,660</span></div>
+      <div class="total-note">+ $1,500 one-time community fee. Continental breakfast included in rent. Lino Lakes location.</div>
+    </div>
+  </div>
+  <div class="footnote">⚠ Waters AL is lowest monthly (utilities/cable included). Lyngblomsten and Lilydale are comparable at min care. Lyngblomsten meal packages are $345–$785/mo (1–3 meals) — continental breakfast already included in rent, so partial packages may work. Care ceiling at Lyngblomsten ($10,045) is highest of all three — well above Waters max ($5,340). Actual care level determined by RN assessment.</div>
+</div>
+
+<!-- ===== MEMORY CARE ===== -->
+<div class="section-label">
+  Memory Care
+  <span class="pill">The Waters · Lilydale · The Willows · Lyngblomsten</span>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th style="color:var(--waters)">The Waters of Highland Park</th>
+        <th style="color:var(--lilydale)">Lilydale Senior Living</th>
+        <th style="color:var(--willows)">The Willows at Ramsey Hill</th>
+        <th style="color:var(--lyng)">Lyngblomsten at Lino Lakes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group-header"><td colspan="5">Monthly Rent</td></tr>
+      <tr>
+        <td>Studio</td>
+        <td><span class="amount">$4,330</span><div class="note">395–527 sq ft</div></td>
+        <td><span class="range">$4,607–$4,753</span><div class="note">495–510 sq ft</div></td>
+        <td><span class="range">$3,917–$4,673</span><div class="note">333–562 sq ft</div></td>
+        <td><span class="amount">$6,280</span><div class="note">440 sq ft (MC1/MC2); utilities included</div></td>
+      </tr>
+      <tr>
+        <td>One Bedroom</td>
+        <td><span class="amount">$4,730</span><div class="note">635 sq ft</div></td>
+        <td><span class="range">$5,629–$5,838</span><div class="note">720–786 sq ft</div></td>
+        <td><span class="range">$4,924–$5,541</span><div class="note">570–780 sq ft</div></td>
+        <td><span class="range">$6,960–$7,010</span><div class="note">560 sq ft (MC3); utilities included</div></td>
+      </tr>
+      <tr>
+        <td>Wing size / scale</td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="amount">17 units total</span><div class="note">Secured wing; intentionally small &amp; intimate</div></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="5">Care Packages (required — nurse-assessed)</td></tr>
+      <tr>
+        <td>Base / lowest tier</td>
+        <td><span class="amount">$3,646/mo</span><div class="note">Level 1 of 6</div></td>
+        <td><span class="amount">$3,199/mo</span><div class="note">Assisted: occasional behavioral intervention</div></td>
+        <td><span class="amount">$3,326/mo</span><div class="note">Assisted Memory Support</div></td>
+        <td><span class="amount">$805/mo</span><div class="note">Lowest Healthcare Service Plan tier</div></td>
+      </tr>
+      <tr>
+        <td>Mid tier</td>
+        <td><span class="amount">$5,346/mo</span><div class="note">Level 3 of 6</div></td>
+        <td><span class="amount">$4,044/mo</span><div class="note">Moderate: incontinent; 1:1 ADL assist</div></td>
+        <td><span class="amount">$3,997/mo</span><div class="note">Moderate Memory Support</div></td>
+        <td><span class="na">—</span><div class="note">Exact mid-level not published</div></td>
+      </tr>
+      <tr>
+        <td>Highest tier</td>
+        <td><span class="amount">$7,896/mo</span><div class="note">Level 6 of 6</div></td>
+        <td><span class="amount">$4,628/mo</span><div class="note">Advanced: moderate + 2-person transfer</div></td>
+        <td><span class="amount">$4,810/mo</span><div class="note">Advanced: moderate + 2-person transfer</div></td>
+        <td><span class="amount">$10,045/mo</span><div class="note">⚠ Highest ceiling of all MC options listed</div></td>
+      </tr>
+      <tr>
+        <td>Care tier range</td>
+        <td><span class="range">$3,646–$7,896</span><div class="note">6 levels</div></td>
+        <td><span class="range">$3,199–$4,628</span><div class="note">3 tiers</div></td>
+        <td><span class="range">$3,326–$4,810</span><div class="note">3 tiers</div></td>
+        <td><span class="range">$805–$10,045</span><div class="note">⚠ Widest range; same scale as their AL</div></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="5">Included in Care Package</td></tr>
+      <tr>
+        <td>24/7 personal care staff</td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Yes — higher staffing ratio noted</span></td>
+      </tr>
+      <tr>
+        <td>Weekly housekeeping</td>
+        <td><span class="included">✓ In care package</span></td>
+        <td><span class="not-included">$38/hr à la carte</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ In basic services (rent)</span></td>
+      </tr>
+      <tr>
+        <td>Memory care programming</td>
+        <td><span class="included">✓ In care package</span></td>
+        <td><span class="included">✓ Smaller groups</span></td>
+        <td><span class="included">✓ Smaller groups</span></td>
+        <td><span class="included">✓ Specialized MC activities in rent</span></td>
+      </tr>
+      <tr>
+        <td>Incontinence products</td>
+        <td><span class="included">✓ In care package</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+      </tr>
+      <tr>
+        <td>RN / nursing access</td>
+        <td><span class="included">✓ RN onsite 40 hrs/wk; on-call 24/7</span></td>
+        <td><span class="included">✓ RN Director on-site</span></td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Ongoing nursing coordination; on-site physician group available</span></td>
+      </tr>
+      <tr>
+        <td>Secured environment</td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Yes</span></td>
+        <td><span class="included">✓ Secured wing + secured private courtyard</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="5">Meals &amp; What's Included in Rent</td></tr>
+      <tr>
+        <td>3 Meals/Day</td>
+        <td><span class="included">✓ Included in rent</span><div class="note">Can opt out for meal credit</div></td>
+        <td><span class="amount">$125/mo add-on</span></td>
+        <td><span class="amount">$125/mo add-on</span></td>
+        <td><span class="amount">$785/mo add-on</span><div class="note">Full restaurant dining package (Wally's)</div></td>
+      </tr>
+      <tr>
+        <td>Utilities (heat, electric…)</td>
+        <td><span class="included">✓ All included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Electricity, heat/A/C, garbage/recycling</span></td>
+      </tr>
+      <tr>
+        <td>Cable &amp; WiFi</td>
+        <td><span class="included">✓ Included</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="na">Not specified</span></td>
+        <td><span class="included">✓ Satellite TV &amp; WiFi</span></td>
+      </tr>
+      <tr>
+        <td>Outside pharmacy charge</td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="amount">$65/mo</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="5">One-Time Fees</td></tr>
+      <tr class="onetime-row">
+        <td>Community / Lifestyle Fee</td>
+        <td><span class="amount">$2,500</span><div class="note">Non-refundable</div></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="amount">$1,000</span><div class="note">Non-refundable; includes campus amenities + secured courtyard</div></td>
+      </tr>
+      <tr class="onetime-row">
+        <td>Reservation / Deposit</td>
+        <td><span class="amount">$1,000</span><div class="note">Applied to 1st month</div></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+
+      <tr class="group-header"><td colspan="5">Optional Monthly Add-Ons</td></tr>
+      <tr>
+        <td>Storage Unit</td>
+        <td><span class="amount">$80/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">Available — price not listed</span></td>
+      </tr>
+      <tr>
+        <td>LTC Insurance Coordination</td>
+        <td><span class="amount">$60/mo</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+        <td><span class="na">—</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MC Totals — Base -->
+<div class="totals-card">
+  <div class="totals-header">Estimated Monthly Total — Memory Care · Studio + Lowest Care + Meals</div>
+  <div class="totals-grid" style="grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;">
+    <div class="total-col scenario-col">Studio at minimum assessed care + 3 meals/day. Waters meals included in rent. Lyngblomsten care starts at $805 but published range is very wide.</div>
+    <div class="total-col">
+      <div class="fac-label waters-label">The Waters</div>
+      <div class="total-row"><span class="total-row-label">Rent (incl. meals)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$4,330</span></div>
+      <div class="total-row"><span class="total-row-label">Care (Level 1)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$3,646</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$7,976</span></div>
+      <div class="total-note">+ $2,500 one-time fee</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lilydale-label">Lilydale</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio, low)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$4,607</span></div>
+      <div class="total-row"><span class="total-row-label">Care (Assisted)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$3,199</span></div>
+      <div class="total-row"><span class="total-row-label">Meals</span><span style="font-family:'DM Mono',monospace;font-size:11px">$125</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$7,931</span></div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label willows-label">The Willows</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio, low)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$3,917</span></div>
+      <div class="total-row"><span class="total-row-label">Care (Assisted)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$3,326</span></div>
+      <div class="total-row"><span class="total-row-label">Meals</span><span style="font-family:'DM Mono',monospace;font-size:11px">$125</span></div>
+      <div class="total-row"><span class="total-row-label">Pharmacy</span><span style="font-family:'DM Mono',monospace;font-size:11px">$65</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$7,433 <span class="low-badge">lower</span></span></div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lyng-label">Lyngblomsten</div>
+      <div class="total-row"><span class="total-row-label">Rent (studio)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$6,280</span></div>
+      <div class="total-row"><span class="total-row-label">Care (min plan)</span><span style="font-family:'DM Mono',monospace;font-size:11px">$805</span></div>
+      <div class="total-row"><span class="total-row-label">3 Meals/Day</span><span style="font-family:'DM Mono',monospace;font-size:11px">$785</span></div>
+      <hr style="border:none;border-top:1px solid #eee;margin:0.4rem 0">
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$7,870</span></div>
+      <div class="total-note">+ $1,000 one-time fee. Utilities included in rent. Care plan range is $805–$10,045.</div>
+    </div>
+  </div>
+
+  <!-- Highest care scenario -->
+  <div class="totals-header" style="background:#3d3730;margin-top:0">Highest Care Level scenario · Studio</div>
+  <div class="totals-grid" style="grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr;">
+    <div class="total-col scenario-col">Studio at highest published care tier + 3 meals. ⚠ Lyngblomsten's ceiling ($10,045) is significantly higher than others.</div>
+    <div class="total-col">
+      <div class="fac-label waters-label">The Waters</div>
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$12,226</span></div>
+      <div class="total-note">$4,330 rent + $7,896 care (Level 6); meals included</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lilydale-label">Lilydale</div>
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$9,360</span></div>
+      <div class="total-note">$4,607 rent + $4,628 care + $125 meals</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label willows-label">The Willows</div>
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$9,042 <span class="low-badge">lower</span></span></div>
+      <div class="total-note">$3,917 rent + $4,810 care + $125 meals + $65 pharmacy</div>
+    </div>
+    <div class="total-col">
+      <div class="fac-label lyng-label">Lyngblomsten</div>
+      <div class="total-row"><span class="total-row-label" style="font-weight:600;color:var(--text)">Monthly total</span><span class="total-amount">$17,110 <span class="high-badge">highest</span></span></div>
+      <div class="total-note">$6,280 rent + $10,045 care (max) + $785 meals</div>
+    </div>
+  </div>
+  <div class="footnote">
+    ⚠ At minimum care, all four facilities land within ~$550/mo of each other ($7,433–$7,976). Lyngblomsten's rent is highest but utilities are included, narrowing the gap slightly. At maximum care, Lyngblomsten ($17,110) is dramatically more expensive than the others due to its $10,045 care ceiling — verify actual assessed level carefully. The small 17-unit wing and strong amenity campus may suit residents who benefit from a more intimate, active-lifestyle environment. Care level assigned post nursing assessment — actual costs depend on needs.
+  </div>
+</div>
+
+</div>
+</body>
+</html>
